@@ -1,0 +1,17 @@
+# Demo Project - 测试套件配置
+# 定义项目中的所有测试套件
+
+基础功能测试:
+  description: "演示基础的测试功能"
+  suite_type: "functional"
+  priority: "high"
+
+性能测试:
+  description: "演示性能测试功能"
+  suite_type: "performance"
+  priority: "medium"
+
+稳定性测试:
+  description: "演示稳定性测试功能"
+  suite_type: "stability"
+  priority: "low"

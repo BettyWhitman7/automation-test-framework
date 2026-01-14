@@ -1,0 +1,29 @@
+# 完整功能测试套件
+# 包含所有功能的完整测试
+
+root:
+  process0:
+    登录功能测试:
+      - example_project
+      - example_test_cases.py
+      - LoginTest
+      
+    数据导入测试:
+      - example_project
+      - example_test_cases.py
+      - DataImportTest
+      
+    数据导出测试:
+      - example_project
+      - example_test_cases.py
+      - DataExportTest
+      
+    报告生成测试:
+      - example_project
+      - example_test_cases.py
+      - ReportGenerationTest
+      
+    配置管理测试:
+      - example_project
+      - example_test_cases.py
+      - ConfigManagementTest

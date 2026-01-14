@@ -1,0 +1,15 @@
+# 项目配置文件
+# 此文件定义了系统中所有的测试项目
+
+projects:
+  - name: "demo_project"
+    description: "演示项目 - 用于展示测试框架的基本功能"
+    path: "demo_project.yaml"
+    author: "系统"
+    create_date: "2025-12-31"
+    
+  - name: "example_project"
+    description: "示例项目 - 包含各种测试场景的完整示例"
+    path: "example_project.yaml"
+    author: "系统"
+    create_date: "2025-12-31"

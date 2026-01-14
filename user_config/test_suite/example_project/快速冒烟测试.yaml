@@ -1,0 +1,19 @@
+# 快速冒烟测试套件
+# 验证基本功能是否正常
+
+root:
+  process0:
+    快速启动测试:
+      - example_project
+      - example_test_cases.py
+      - QuickStartTest
+      
+    基本连接测试:
+      - example_project
+      - example_test_cases.py
+      - BasicConnectionTest
+      
+    核心功能验证:
+      - example_project
+      - example_test_cases.py
+      - CoreFunctionTest

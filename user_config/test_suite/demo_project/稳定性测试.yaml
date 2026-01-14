@@ -1,0 +1,14 @@
+# 稳定性测试套件
+# 包含长时间运行和压力测试用例
+
+root:
+  process0:
+    长时间运行测试:
+      - demo_project
+      - demo_test_cases.py
+      - LongRunningTest
+      
+    压力测试:
+      - demo_project
+      - demo_test_cases.py
+      - StressTest
