@@ -18,3 +18,4 @@ class Config:
         USER_CONFIG_DIR, "testcase_config"
     )  # 测试用例配置目录,用于用例执行时的参数配置
 
+class Config:
