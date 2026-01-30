@@ -17,3 +17,9 @@ class Config:
     TESTCASE_CONFIG_DIR = os.path.join(
         USER_CONFIG_DIR, "testcase_config"
     )  # 测试用例配置目录,用于用例执行时的参数配置
+SER_CONFIG_DIR = os.path.join(ROOT_DIR, "user_config")  # 用户配置目录
+    DEV_CONFIG_DIR = os.path.join(USER_CONFIG_DIR, "dev_config")  # 设备配置目录
+    TEST_SUITE_DIR = os.path.join(USER_CONFIG_DIR, "test_suite")  # 测试套件目录
+    TESTCASE_CONFIG_DIR = os.path.join(
+        USER_CONFIG_DIR, "testcase_config"
+    )  # 测试用例配置目录,用于用例执行时的参数配置
