@@ -1,5 +1,5 @@
 /* ===============================================
-   Fluent Design 组件统一样式表 - PySide6/PyQt6兼容版本
+   Fluent Design 组件统一样式表 - PySide6版本
    Light Mode (亮色主题)
    优化版本：增强视觉效果、统一设计令牌
    =============================================== */
@@ -142,31 +142,6 @@ QLineEdit:focus {
 }
 */
 
-/* 下拉箭头区域 */
-QComboBox::drop-down, QDateEdit::drop-down, QTimeEdit::drop-down, QDateTimeEdit::drop-down {
-    border: none;
-    width: 32px;
-    background-color: transparent;
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    margin-left: 5px;
-}
-
-QComboBox::down-arrow, QDateEdit::down-arrow, QTimeEdit::down-arrow, QDateTimeEdit::down-arrow {
-    image: none;
-    border-image: none;
-    /* 使用纯CSS绘制箭头或使用图片，此处用字符替代或依赖默认样式调整 */
-    width: 12px; 
-    height: 12px;
-}
-/* 注意：QSS无法直接绘制复杂图标，通常需配套图片资源。此处简化边框模拟箭头在很多环境不生效，建议在Py代码设图标。
-   为保证纯QSS效果，我们依赖颜色的变化提示。
-*/
-
-QComboBox::drop-down:hover {
-    background-color: #F3F2F1;
-    border-radius: 4px;
-}
 
 /* SpinBox 上下按钮 */
 QSpinBox::up-button, QDoubleSpinBox::up-button,
@@ -190,19 +165,19 @@ QSpinBox::down-button:pressed, QDoubleSpinBox::down-button:pressed {
 
 /* SpinBox 箭头样式 */
 QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
-    width: 10px;
-    height: 10px;
-    border-left: 2px solid #605E5C;
-    border-top: 2px solid #605E5C;
-    transform: rotate(45deg);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid #605E5C;
 }
 
 QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
-    width: 10px;
-    height: 10px;
-    border-right: 2px solid #605E5C;
-    border-bottom: 2px solid #605E5C;
-    transform: rotate(45deg);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #605E5C;
 }
 
 QSpinBox::up-arrow:hover, QDoubleSpinBox::up-arrow:hover,
@@ -212,6 +187,89 @@ QSpinBox::down-arrow:hover, QDoubleSpinBox::down-arrow:hover {
 
 QSpinBox::up-arrow:disabled, QDoubleSpinBox::up-arrow:disabled,
 QSpinBox::down-arrow:disabled, QDoubleSpinBox::down-arrow:disabled {
+    border-color: #A19F9D;
+}
+
+/* ComboBox 下拉按钮 */
+QComboBox::drop-down, QFontComboBox::drop-down {
+    width: 24px;
+    border: none;
+    background-color: #F3F2F1;
+    border-radius: 3px;
+    margin: 2px;
+    subcontrol-position: right center;
+}
+
+QComboBox::drop-down:hover, QFontComboBox::drop-down:hover {
+    background-color: #E1DFDD;
+}
+
+QComboBox::drop-down:pressed, QFontComboBox::drop-down:pressed {
+    background-color: #C8C6C4;
+}
+
+/* ComboBox 下拉箭头 */
+QComboBox::down-arrow, QFontComboBox::down-arrow {
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #605E5C;
+    margin: 0 auto;
+}
+
+QComboBox::down-arrow:hover, QFontComboBox::down-arrow:hover {
+    border-top-color: #323130;
+}
+
+QComboBox::down-arrow:disabled, QFontComboBox::down-arrow:disabled {
+    border-top-color: #A19F9D;
+}
+
+/* DateEdit, TimeEdit, DateTimeEdit 上下按钮 */
+QDateEdit::up-button, QTimeEdit::up-button, QDateTimeEdit::up-button,
+QDateEdit::down-button, QTimeEdit::down-button, QDateTimeEdit::down-button {
+    width: 24px;
+    border: none;
+    background-color: #F3F2F1;
+    border-radius: 3px;
+    margin: 2px;
+}
+
+QDateEdit::up-button:hover, QTimeEdit::up-button:hover, QDateTimeEdit::up-button:hover,
+QDateEdit::down-button:hover, QTimeEdit::down-button:hover, QDateTimeEdit::down-button:hover {
+    background-color: #E1DFDD;
+}
+
+QDateEdit::up-button:pressed, QTimeEdit::up-button:pressed, QDateTimeEdit::up-button:pressed,
+QDateEdit::down-button:pressed, QTimeEdit::down-button:pressed, QDateTimeEdit::down-button:pressed {
+    background-color: #C8C6C4;
+}
+
+/* DateEdit 上下箭头 */
+QDateEdit::up-arrow, QTimeEdit::up-arrow, QDateTimeEdit::up-arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid #605E5C;
+}
+
+QDateEdit::down-arrow, QTimeEdit::down-arrow, QDateTimeEdit::down-arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #605E5C;
+}
+
+QDateEdit::up-arrow:hover, QTimeEdit::up-arrow:hover, QDateTimeEdit::up-arrow:hover,
+QDateEdit::down-arrow:hover, QTimeEdit::down-arrow:hover, QDateTimeEdit::down-arrow:hover {
+    border-color: #323130;
+}
+
+QDateEdit::up-arrow:disabled, QTimeEdit::up-arrow:disabled, QDateTimeEdit::up-arrow:disabled,
+QDateEdit::down-arrow:disabled, QTimeEdit::down-arrow:disabled, QDateTimeEdit::down-arrow:disabled {
     border-color: #A19F9D;
 }
 
@@ -1005,7 +1063,7 @@ QLabel#FluentDialogContent {
 
 /* 对话框图标 */
 QLabel#FluentDialogIcon {
-    font-size: 28px;
+    font-size: 24px;
 }
 
 /* 主要按钮 */
@@ -1110,3 +1168,60 @@ QProgressBar#FluentDialogProgress::chunk {
     background-color: #0078D4;
     border-radius: 2px;
 }
+
+/* ===============================================
+   Fluent 可停靠日志面板 (FluentDockLogPanel)
+   =============================================== */
+
+QDockWidget#FluentDockLogPanel {
+    titlebar-close-icon: url(close.png);
+    titlebar-normal-icon: url(float.png);
+}
+
+QDockWidget#FluentDockLogPanel::title {
+    background-color: #F3F2F1;
+    border: 1px solid #E1DFDD;
+    border-bottom: none;
+    padding: 6px 8px;
+    text-align: left;
+    color: #323130;
+    font-weight: 600;
+}
+
+QWidget#FluentDockLogPanelContent {
+    background-color: #F3F2F1;
+    border: 1px solid #E1DFDD;
+}
+
+QLabel#FluentDockLogPanelLabel {
+    color: #605E5C;
+    font-size: 12px;
+}
+
+QPushButton#FluentDockLogPanelClearBtn {
+    background-color: #E1DFDD;
+    border: none;
+    border-radius: 4px;
+    color: #323130;
+    font-size: 12px;
+    padding: 2px 8px;
+}
+
+QPushButton#FluentDockLogPanelClearBtn:hover {
+    background-color: #D1CFCD;
+}
+
+QPushButton#FluentDockLogPanelClearBtn:pressed {
+    background-color: #C8C6C4;
+}
+
+QTextEdit#FluentDockLogPanelText {
+    background-color: #FFFFFF;
+    border: 1px solid #E1DFDD;
+    border-radius: 4px;
+    color: #323130;
+    font-family: "Consolas", "Microsoft YaHei", monospace;
+    font-size: 12px;
+    padding: 8px;
+}
+

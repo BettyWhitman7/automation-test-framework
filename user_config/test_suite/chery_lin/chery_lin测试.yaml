@@ -1,0 +1,4 @@
+root:
+  process0:
+    # 测试用例格式: [项目名, 模块文件, 类名, 其他参数...]
+    奇瑞水泵LIN转速递增测试: ["chery_lin", "chery_lin_test.py", "CheryLinSpeedTest"]

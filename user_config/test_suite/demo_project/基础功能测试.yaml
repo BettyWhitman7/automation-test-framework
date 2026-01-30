@@ -4,17 +4,6 @@
 root:
   process0:
     # 测试用例格式: [项目名, 模块文件, 类名, 其他参数...]
-    简单测试用例:
-      - demo_project
-      - demo_test_cases.py
-      - SimpleTestCase
-      
-    数据验证测试:
-      - demo_project
-      - demo_test_cases.py
-      - DataValidationTest
-      
-    状态检查测试:
-      - demo_project
-      - demo_test_cases.py
-      - StatusCheckTest
+    简单测试用例: ["demo_project", "demo_test_cases.py", "SimpleTestCase"]
+    数据验证测试: ["demo_project", "demo_test_cases.py", "DataValidationTest"]
+    状态检查测试: ["demo_project", "demo_test_cases.py", "StatusCheckTest"]

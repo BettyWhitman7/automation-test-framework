@@ -5,24 +5,31 @@ Fluent Dialog 组件演示
     python demo_dialog.py
 """
 
-import sys
 import os
+import sys
 
 # 添加父目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, 
-    QHBoxLayout, QPushButton, QLabel, QFrame, QCheckBox
-)
-from PySide6.QtCore import Qt, QTimer
+from PySide6.QtCore import QTimer, Qt
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from fluent_dialog import (
-    FluentMessageBox,
-    FluentInputDialog,
     FluentConfirmDialog,
-    FluentProgressDialog
+    FluentInputDialog,
+    FluentMessageBox,
+    FluentProgressDialog,
 )
 from theme import FluentTheme
 
@@ -161,7 +168,7 @@ class DemoWindow(QMainWindow):
         self.set_result(f"确认框 - 保存: {result}")
     
     def show_error(self):
-        result = FluentMessageBox.error(
+        result = FluentMessageBox.critical(
             self, "错误",
             "操作失败！无法连接到服务器，请检查网络设置后重试。"
         )

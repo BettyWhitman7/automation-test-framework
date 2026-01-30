@@ -2,6 +2,7 @@ import sys
 import os
 import importlib
 import datetime
+import json
 from config import Config
 from PySide6.QtWidgets import (
     QApplication,
@@ -33,6 +34,7 @@ from PySide6.QtCore import Qt, QObject, QThread, Signal, QTimer
 from tools.load_yaml import load_yaml_config
 from testCaseModel import TestCaseModel
 from fluent_qss import FluentTheme, FluentMessageBox, show_toast
+from fluent_qss.fluent_dock_log_panel import FluentDockLogPanel
 from tools.log_tool import setup_logger, get_logger
 
 
@@ -261,14 +263,9 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 1400, 800)
 
         # 初始化日志系统
-        setup_logger(
-            log_dir="logs",
-            console_level="INFO",
-            file_level="DEBUG"
-        )
         self.logger = get_logger(__name__)
         self.logger.info("=" * 60)
-        self.logger.info("自动化测试框架启动")
+        self.logger.info("自动化测试框架启动") 
         self.logger.info("=" * 60)
 
         # 初始化主题
@@ -337,8 +334,12 @@ class MainWindow(QMainWindow):
 
         # 进度条
         self.progress_bar = QProgressBar(self)
-        self.progress_bar.setVisible(False)
         self.progress_bar.setTextVisible(True)
+        self.progress_bar.setMinimum(0)
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setValue(0)
+        self.progress_bar.setFormat("就绪")
+        self.progress_bar.setMaximumHeight(10)  # 限制进度条高度
 
         # 搜索框
         self.search_box = QLineEdit(self)
@@ -353,10 +354,14 @@ class MainWindow(QMainWindow):
         self.test_case_table = QTableView(self)
         self.test_case_table.setModel(self.test_case_model)
         self.test_case_table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        # 设置最小高度，防止内容为空时表格收缩导致标题移动
+        self.test_case_table.setMinimumHeight(300)
+        # 强制显示垂直滚动条，防止滚动条出现/消失导致表头位置变化
+        self.test_case_table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
 
-        # 日志输出
-        self.log_output = QTextEdit(self)
-        self.log_output.setReadOnly(True)
+        # 日志面板 - 使用 FluentDockLogPanel
+        self.log_panel = FluentDockLogPanel(self, title="📋 执行日志")
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.log_panel)
 
         # 批量操作按钮
         self.select_all_button = QPushButton("全选", self)
@@ -436,6 +441,8 @@ class MainWindow(QMainWindow):
         # 测试用例组
         testcase_group = QGroupBox("测试用例")
         testcase_layout = QVBoxLayout()
+        testcase_layout.setContentsMargins(5, 10, 5, 5)  # 设置固定边距
+        testcase_layout.setSpacing(5)  # 设置固定间距
 
         # 搜索和批量操作
         search_batch_layout = QVBoxLayout()
@@ -451,12 +458,6 @@ class MainWindow(QMainWindow):
         testcase_layout.addLayout(search_batch_layout)
         testcase_layout.addWidget(self.test_case_table)
         testcase_group.setLayout(testcase_layout)
-
-        # 日志组
-        log_group = QGroupBox("执行日志")
-        log_layout = QVBoxLayout()
-        log_layout.addWidget(self.log_output)
-        log_group.setLayout(log_layout)
 
         # 左侧面板
         left_widget = QWidget()
@@ -475,17 +476,17 @@ class MainWindow(QMainWindow):
         middle_splitter.addWidget(left_widget)
         middle_splitter.addWidget(right_widget)
         middle_splitter.setSizes([300, 1100])
+        # 禁用子组件的收缩，保持布局稳定
+        middle_splitter.setChildrenCollapsible(False)
 
         # 主布局
         main_layout = QVBoxLayout()
         main_layout.addWidget(control_group)
         main_layout.addWidget(stats_group)
-        main_layout.addWidget(self.progress_bar)
         main_layout.addWidget(middle_splitter)
-        main_layout.addWidget(log_group)
+        main_layout.addWidget(self.progress_bar)
 
-        main_layout.setStretch(3, 7)
-        main_layout.setStretch(4, 3)
+        main_layout.setStretch(2, 1)
 
         central_widget = QWidget()
         central_widget.setLayout(main_layout)
@@ -501,7 +502,8 @@ class MainWindow(QMainWindow):
         toolbar.addAction("重启测试", self.restart_test)
         toolbar.addAction("多轮设置", self._show_multi_round_dialog)
         toolbar.addSeparator()
-        toolbar.addAction("清空日志", self._clear_log)
+        toolbar.addAction("💾 保存测试报告", self._save_test_report)
+        toolbar.addAction("📋 显示/隐藏日志", self._toggle_log_panel)
         toolbar.addAction("🌓 切换主题", self._toggle_theme)
 
     def _toggle_theme(self):
@@ -509,11 +511,99 @@ class MainWindow(QMainWindow):
         self.theme.toggle(QApplication.instance())
         mode = "暗色" if self.theme.is_dark else "亮色"
         self.log_message(f"已切换到{mode}主题", "INFO")
-
-    def _clear_log(self):
-        """清空日志输出"""
-        self.log_output.clear()
-        self.log_message("日志已清空", "INFO")
+    
+    def _toggle_log_panel(self):
+        """切换日志面板显示/隐藏"""
+        if self.log_panel.isVisible():
+            self.log_panel.hide()
+        else:
+            self.log_panel.show()
+    
+    def _save_test_report(self):
+        """保存测试报告"""
+        try:
+            # 生成报告数据
+            report_data = self._generate_report_data()
+            
+            # 生成报告文件名
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            project_name = self.current_project_name or "未知项目"
+            suite_name = self.current_test_suite or "未知套件"
+            report_filename = f"测试报告_{project_name}_{suite_name}_{timestamp}.json"
+            
+            # 确保报告目录存在
+            report_dir = os.path.join(Config.ROOT_DIR, "test_reports")
+            os.makedirs(report_dir, exist_ok=True)
+            
+            report_path = os.path.join(report_dir, report_filename)
+            
+            # 保存为JSON格式
+            with open(report_path, 'w', encoding='utf-8') as f:
+                json.dump(report_data, f, ensure_ascii=False, indent=2)
+            
+            self.log_message(f"测试报告已保存: {report_path}", "SUCCESS")
+            self.logger.success(f"测试报告已保存: {report_path}")
+            
+            # 显示提示
+            show_toast(f"✅ 测试报告已保存至:\n{report_filename}", duration=3000, parent=self)
+            
+        except Exception as e:
+            error_msg = f"保存测试报告失败: {str(e)}"
+            self.log_message(error_msg, "ERROR")
+            self.logger.exception("保存测试报告时发生异常")
+    
+    def _generate_report_data(self):
+        """生成测试报告数据"""
+        # 收集所有测试用例的结果
+        test_cases = []
+        for row in range(self.test_case_model.rowCount()):
+            case_name_item = self.test_case_model.item(row, 1)
+            status_item = self.test_case_model.item(row, 2)
+            progress_item = self.test_case_model.item(row, 3)
+            exec_count_item = self.test_case_model.item(row, 4)
+            fail_count_item = self.test_case_model.item(row, 5)
+            result_item = self.test_case_model.item(row, 6)
+            message_item = self.test_case_model.item(row, 7)
+            
+            if case_name_item:
+                test_cases.append({
+                    "用例名称": case_name_item.text(),
+                    "状态": status_item.text() if status_item else "",
+                    "进度": progress_item.text() if progress_item else "",
+                    "执行次数": exec_count_item.text() if exec_count_item else "0",
+                    "失败次数": fail_count_item.text() if fail_count_item else "0",
+                    "最后结果": result_item.text() if result_item else "",
+                    "详细信息": message_item.text() if message_item else ""
+                })
+        
+        # 计算成功率
+        pass_rate = (
+            (self.passed_tests / self.total_tests * 100) if self.total_tests > 0 else 0
+        )
+        
+        # 组装报告数据
+        report_data = {
+            "报告信息": {
+                "生成时间": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "项目名称": self.current_project_name,
+                "测试套件": self.current_test_suite,
+                "测试轮次": self.test_settings["rounds"]
+            },
+            "测试统计": {
+                "总测试数": self.total_tests,
+                "成功数": self.passed_tests,
+                "失败数": self.failed_tests,
+                "成功率": f"{pass_rate:.2f}%"
+            },
+            "测试设置": {
+                "测试轮数": self.test_settings["rounds"],
+                "失败时停止": self.test_settings["stop_on_fail"],
+                "轮次间延时": f"{self.test_settings['delay']}秒"
+            },
+            "测试用例详情": test_cases
+        }
+        
+        return report_data
 
     def _show_multi_round_dialog(self):
         """显示多轮测试设置对话框"""
@@ -535,11 +625,23 @@ class MainWindow(QMainWindow):
         self.test_case_table.setAlternatingRowColors(True)
         self.test_case_table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.test_case_table.setShowGrid(True)
-        self.test_case_table.setSortingEnabled(True)
+        self.test_case_table.setSortingEnabled(False)  # 禁用排序，防止表格重排导致跳动
         self.test_case_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        
+        # 隐藏垂直表头，防止数据加载时表头跳动
+        self.test_case_table.verticalHeader().setVisible(False)
 
-        # 设置列宽模式
+        # 设置水平表头属性
         header = self.test_case_table.horizontalHeader()
+        if header:
+            header.setStretchLastSection(False)  # 禁用最后一列的自动拉伸
+            header.setMinimumSectionSize(40)  # 设置最小列宽
+            header.setSectionsMovable(False)  # 禁止拖动列
+            header.setHighlightSections(False)  # 禁用高亮
+            # 防止表头在数据变化时重新计算大小
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        
+        # 先设置所有列为固定模式，然后再设置具体列宽和拉伸列
         if header:
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 选择列
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)  # 用例名称列
@@ -549,59 +651,36 @@ class MainWindow(QMainWindow):
             header.setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)  # 失败次数列
             header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)  # 最后结果列
             header.setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)  # 详细信息列
-
+                        
         # 设置固定列宽
-        self.test_case_table.setColumnWidth(0, 40)  # 选择
+        self.test_case_table.setColumnWidth(0, 50)  # 选择
         self.test_case_table.setColumnWidth(2, 80)  # 状态
         self.test_case_table.setColumnWidth(3, 100)  # 进度
         self.test_case_table.setColumnWidth(4, 80)  # 执行次数
         self.test_case_table.setColumnWidth(5, 80)  # 失败次数
-        self.test_case_table.setColumnWidth(6, 80)  # 最后结果
+        self.test_case_table.setColumnWidth(6, 100)  # 最后结果
 
     # ========== 日志方法 ==========
 
-    def logMessage(self, message, level="INFO"):
-        """统一的日志记录方法，支持颜色和时间戳（兼容旧接口）"""
-        self.log_message(message, level)
-
     def log_message(self, message, level="INFO"):
         """统一的日志记录方法，支持颜色和时间戳"""
-        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-
-        # 添加图标
-        icon_map = {
-            "INFO": "ℹ️",
-            "SUCCESS": "✅",
-            "FAIL": "❌",
-            "ERROR": "⚠️",
-            "WARNING": "⚪",
-        }
-
-        color_map = {
-            "INFO": "#2196F3",
-            "SUCCESS": "#4CAF50",
-            "FAIL": "#F44336",
-            "ERROR": "#FF9800",
-            "WARNING": "#9C27B0",
-        }
-
-        icon = icon_map.get(level, "")
-        color = color_map.get(level, "black")
-
-        log_entry = f"""
-        <div style="margin: 2px 0; padding: 4px; border-left: 3px solid {color}; background-color: {color}15;">
-            <span style="color: #666; font-size: 11px;">[{timestamp}]</span>
-            <span style="color: {color}; font-weight: bold;">{icon} {level}</span>: 
-            <span style="color: #333;">{message}</span>
-        </div>
-        """
-
-        self.log_output.append(log_entry)
-
-        # 自动滚动到底部
-        scrollbar = self.log_output.verticalScrollBar()
-        if scrollbar:
-            scrollbar.setValue(scrollbar.maximum())
+        # 显示到 UI 日志面板
+        self.log_panel.append_log(message, level)
+        
+        # 同时写入日志文件
+        level_upper = level.upper()
+        if level_upper == "SUCCESS":
+            self.logger.success(message)
+        elif level_upper == "ERROR":
+            self.logger.error(message)
+        elif level_upper == "WARNING" or level_upper == "WARN":
+            self.logger.warning(message)
+        elif level_upper == "DEBUG":
+            self.logger.debug(message)
+        elif level_upper == "FAIL":
+            self.logger.error(f"[FAIL] {message}")
+        else:  # INFO 或其他
+            self.logger.info(message)
 
     # ========== 用例选择与筛选方法 ==========
 
@@ -777,7 +856,7 @@ class MainWindow(QMainWindow):
 
                 # 存储测试用例配置，供后续执行使用
                 self.test_cases_config = {"test_cases": {project_name: test_cases}}
-
+                
                 self.log_message(
                     f"已加载项目 '{project_name}' 的测试套件 '{suite_name}'，共 {len(test_cases)} 个测试用例",
                     "INFO",
@@ -793,28 +872,48 @@ class MainWindow(QMainWindow):
             self.logger.exception(f"加载测试套件失败: {project_name}/{suite_name}")
 
     def _parse_test_cases(self, suite_config):
-        """解析测试套件配置文件中的测试用例"""
+        """解析测试套件配置文件中的测试用例
+        
+        格式要求（数组格式）:
+        测试用例名: ["项目名", "模块文件", "类名", 测试数据...]
+        
+        说明:
+        - 前3个元素必须是: 项目名、模块文件、类名
+        - 可以在后面添加额外的测试数据参数（可选）
+        
+        示例:
+        root:
+          process0:
+            # 基础用例（无额外参数）
+            简单测试用例: ["demo_project", "demo_test_cases.py", "SimpleTestCase"]
+            # 带测试数据的用例
+            数据验证测试: ["demo_project", "demo_test_cases.py", "DataTest", {"key": "value"}, 100]
+        """
         self.logger.debug("开始解析测试用例配置")
         test_cases = {}
 
         try:
-            # 根据配置文件结构解析
-            # 假设结构为: root -> process0 -> 测试用例名 -> [配置数组]
+            # 结构: root -> process0 -> 测试用例名 -> 数组配置
             root = suite_config.get("root", {})
             process0 = root.get("process0", {})
 
             for case_name, case_config in process0.items():
                 if isinstance(case_config, list) and len(case_config) >= 3:
-                    # 确保配置数组至少有3个元素：[项目文件夹, 文件路径, 类名, ...]
+                    # 数组格式: ["项目文件夹", "文件路径", "类名", ...]
                     test_cases[case_name] = case_config
+                    self.logger.debug(f"已解析测试用例 '{case_name}': {case_config}")
                 else:
                     self.log_message(
-                        f"测试用例 '{case_name}' 的配置格式不正确，跳过", "WARNING"
+                        f"测试用例 '{case_name}' 的配置格式不正确，需要数组格式如: [\"项目\", \"文件\", \"类\"] (当前: {case_config})", 
+                        "WARNING"
                     )
+                    self.logger.warning(f"测试用例 '{case_name}' 配置格式错误: {case_config}")
 
         except Exception as e:
             self.log_message(f"解析测试用例配置时出错: {str(e)}", "ERROR")
+            self.logger.exception("解析测试用例配置时发生异常")
 
+        self.logger.info(f"成功解析 {len(test_cases)} 个测试用例")
         return test_cases
 
     # ========== 测试执行方法 ==========
@@ -826,6 +925,7 @@ class MainWindow(QMainWindow):
         self.logger.info("=" * 50)
         
         # 重置统计数据
+        self.total_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
         self.logger.debug("统计数据已重置")
@@ -872,7 +972,6 @@ class MainWindow(QMainWindow):
         # 设置进度条
         self.progress_bar.setMaximum(self.total_tests)
         self.progress_bar.setValue(0)
-        self.progress_bar.setVisible(True)
 
         self.log_message(
             f"开始执行测试套件 '{self.current_test_suite}'，共 {len(cases_to_run)} 个用例，{self.test_settings['rounds']} 轮",
@@ -922,7 +1021,7 @@ class MainWindow(QMainWindow):
         log_level = (
             "SUCCESS" if result == "Pass" else ("FAIL" if result == "Fail" else "ERROR")
         )
-        self.logMessage(
+        self.log_message(
             f"[轮次 {round_num}] 测试完成: {case_name} - 结果: {result} - 信息: {message}",
             log_level,
         )
@@ -955,6 +1054,9 @@ class MainWindow(QMainWindow):
         self.status_bar.showMessage(
             f"正在执行测试... ({current_progress}/{self.total_tests})"
         )
+        
+        # 刷新UI统计显示
+        self._update_stats_ui()
 
     def _on_case_updated(self, case_name):
         """测试用例更新回调"""
@@ -980,7 +1082,8 @@ class MainWindow(QMainWindow):
         
         self.log_message("所有选定测试已执行完毕。", "INFO")
         self._update_button_states(is_running=False)
-        self.progress_bar.setVisible(False)
+        # 进度条保持显示，但重置格式
+        self.progress_bar.setFormat(f"测试完成 - {self.passed_tests}/{self.total_tests}")
 
         # 更新状态栏
         pass_rate = (
@@ -988,6 +1091,10 @@ class MainWindow(QMainWindow):
         )
         self.status_bar.showMessage(f"测试完成 - 成功率: {pass_rate:.1f}%")
         self.logger.success(f"测试完成，成功率: {pass_rate:.1f}%")
+        
+        # 自动保存测试报告
+        if self.total_tests > 0:
+            self._save_test_report()
 
         if self.is_restarting:
             self.is_restarting = False
@@ -1029,9 +1136,14 @@ class MainWindow(QMainWindow):
 
     def _update_stats_ui(self):
         """更新统计信息显示"""
-        # 获取选中的用例数量
-        selected_cases = len(self.test_case_model.get_selected_cases())
-        total_with_rounds = selected_cases * self.test_settings["rounds"]
+        #  使用实际的测试总数（如果为0则使用选中用例数计算）
+        if self.total_tests == 0:
+            # 测试未开始，显示预估数量
+            selected_cases = len(self.test_case_model.get_selected_cases())
+            display_total = selected_cases * self.test_settings["rounds"]
+        else:
+            # 测试已开始，使用实际总数
+            display_total = self.total_tests
 
         # 计算成功率
         pass_rate = (
@@ -1039,7 +1151,7 @@ class MainWindow(QMainWindow):
         )
 
         # 使用更丰富的显示格式
-        self.total_label.setText(f"📊 总数: {total_with_rounds}")
+        self.total_label.setText(f"📊 总数: {display_total}")
         self.passed_label.setText(f"✅ 成功: {self.passed_tests}")
         self.failed_label.setText(f"❌ 失败: {self.failed_tests}")
 
@@ -1049,7 +1161,7 @@ class MainWindow(QMainWindow):
                 "green" if pass_rate >= 90 else "orange" if pass_rate >= 70 else "red"
             )
             self.total_label.setText(
-                f"📊 总数: {total_with_rounds} (成功率: <span style='color: {rate_color}'>{pass_rate:.1f}%</span>)"
+                f"📊 总数: {display_total} (成功率: <span style='color: {rate_color}'>{pass_rate:.1f}%</span>)"
             )
 
     def _update_button_states(self, is_running):

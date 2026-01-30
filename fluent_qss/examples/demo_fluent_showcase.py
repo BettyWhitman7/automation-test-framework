@@ -5,27 +5,55 @@
 """
 
 
-import sys
 from pathlib import Path
+import sys
 
 # 添加父目录到路径，以便导入 fluent_qss
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from PySide6.QtCore import QDate, QDateTime, QTime, Qt
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QTabWidget, QLabel, QPushButton, QLineEdit, QTextEdit,
-    QComboBox, QCheckBox, QRadioButton, QSlider, QSpinBox, QDoubleSpinBox,
-    QDateEdit, QTimeEdit, QDateTimeEdit, QCalendarWidget, QProgressBar,
-    QScrollArea, QGroupBox, QListWidget, QListWidgetItem,
-    QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
-    QSplitter, QToolBar, QStatusBar, QMenuBar, QMenu, QMessageBox,
-    QDockWidget, QFontComboBox, QLCDNumber, QDial, QFileDialog, QColorDialog
+    QApplication,
+    QCalendarWidget,
+    QCheckBox,
+    QColorDialog,
+    QComboBox,
+    QDateEdit,
+    QDateTimeEdit,
+    QDial,
+    QDockWidget,
+    QDoubleSpinBox,
+    QFileDialog,
+    QFontComboBox,
+    QGroupBox,
+    QHBoxLayout,
+    QLCDNumber,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QSlider,
+    QSpinBox,
+    QSplitter,
+    QTabWidget,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QTimeEdit,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import Qt, QDate, QTime, QDateTime
-from PySide6.QtGui import QIcon, QColor
 
-# 从 fluent_qss 工具库导入
-from fluent_qss import show_toast, FluentTheme
+from fluent_qss import FluentTheme, show_toast
 
 
 class FluentWidgetsShowcase(QMainWindow):

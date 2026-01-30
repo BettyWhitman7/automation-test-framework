@@ -3,9 +3,9 @@ Toast 通知组件 - Fluent Design风格
 用于显示临时通知消息
 """
 
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QPoint, QEasingCurve, QRect
+from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, QTimer, Qt
 from PySide6.QtGui import QFont
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 
 class FluentToast(QWidget):

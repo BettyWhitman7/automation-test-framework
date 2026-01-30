@@ -7,9 +7,11 @@ projects:
     path: "demo_project.yaml"
     author: "系统"
     create_date: "2025-12-31"
-    
-  - name: "example_project"
-    description: "示例项目 - 包含各种测试场景的完整示例"
-    path: "example_project.yaml"
+
+  - name: "chery_lin"
+    description: "奇瑞水泵Lin测试"
+    path: "chery_lin.yaml"
     author: "系统"
-    create_date: "2025-12-31"
+    create_date: "2026-01-29"
+    
+

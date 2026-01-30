@@ -1,13 +1,21 @@
-import sys
 from pathlib import Path
+import sys
 
 # 添加父目录到路径，以便导入 fluent_qss
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QStackedWidget, QLabel, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget
+)
 
-# 从 fluent_qss 工具库导入
 from fluent_qss import FluentSideMenu, FluentTheme
 
 

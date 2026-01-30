@@ -21,9 +21,9 @@ Fluent Design 主题管理器
     path = get_theme_path(dark=False)  # 获取 QSS 文件路径
 """
 
-from pathlib import Path
-from typing import Union, Optional
 from enum import Enum
+from pathlib import Path
+from typing import Optional, Union
 
 
 class ThemeMode(Enum):

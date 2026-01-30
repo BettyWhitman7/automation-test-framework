@@ -3,12 +3,5 @@
 
 root:
   process0:
-    响应时间测试:
-      - demo_project
-      - demo_test_cases.py
-      - ResponseTimeTest
-      
-    并发性能测试:
-      - demo_project
-      - demo_test_cases.py
-      - ConcurrencyTest
+    响应时间测试: ["demo_project", "demo_test_cases.py", "ResponseTimeTest"]
+    并发性能测试: ["demo_project", "demo_test_cases.py", "ConcurrencyTest"]

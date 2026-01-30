@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Qt
+from PySide6.QtCore import  Signal, Qt
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QColor
 
 
@@ -167,15 +167,12 @@ class TestCaseModel(QStandardItemModel):
 
     def clear_all_cases(self):
         """清空所有测试用例"""
-        self.clear()
+        # 只删除所有数据行，保留表头
+        self.removeRows(0, self.rowCount())
         self.test_case_data.clear()
-        self.setup_headers()
 
     def reset_all_case_data(self):
         """重置所有测试用例的数据"""
-        # 暂时阻塞信号以避免多次刷新导致界面闪烁
-        self.blockSignals(True)
-        
         for case_name in self.test_case_data.keys():
             self.test_case_data[case_name] = {
                 "test_count": 0,
@@ -186,9 +183,3 @@ class TestCaseModel(QStandardItemModel):
                 "status": "待测试",
             }
             self._update_table_row(case_name)
-        
-        # 恢复信号发射
-        self.blockSignals(False)
-        
-        # 发出一次布局变化信号，触发视图刷新
-        self.layoutChanged.emit()

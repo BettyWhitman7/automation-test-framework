@@ -6,23 +6,44 @@ Fluent Design 弹框组件库
 使用示例:
     from fluent_qss import FluentMessageBox, FluentInputDialog
     
-    # MessageBox
-    FluentMessageBox.information(parent, "标题", "这是一条信息")
-    FluentMessageBox.question(parent, "确认", "确认要执行此操作吗？")
+    # 显示消息框
+    FluentMessageBox.information(parent, "提示", "操作成功!")
+    FluentMessageBox.warning(parent, "警告", "操作失败!")
+    FluentMessageBox.critical(parent, "错误", "操作失败!")
+    result = FluentMessageBox.question(parent, "确认", "是否继续?")
     
-    # InputDialog
-    text, ok = FluentInputDialog.getText(parent, "输入", "请输入内容:")
+    # 显示输入框
+    text, ok = FluentInputDialog.getText(parent, "输入", "请输入名称:")
+    multiLineText, ok = FluentInputDialog.getMultiLineText(parent, "输入", "请输入多行文本:")
+    int, ok = FluentInputDialog.getInt(parent, "输入", "请输入数字:")
+    
+    #确认对话框
+    FluentConfirmDialog.confirm(parent, "确认", "是否继续?")
+
+    #进度对话框
+    FluentProgressDialog(parent, "处理中", "请稍候...") 
+    
 """
 
-from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QFrame, QGraphicsDropShadowEffect, QLineEdit,
-    QTextEdit, QApplication, QProgressBar, QWidget
-)
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont, QColor, QPainter
 from enum import Enum
 from typing import Tuple
+
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QPainter
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QProgressBar,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class DialogButtonRole(Enum):
@@ -182,7 +203,7 @@ class FluentMessageBox(FluentDialogBase):
         # 图标
         icon_label = QLabel(self.ICONS[self._msg_type])
         icon_label.setObjectName("FluentDialogIcon")
-        icon_label.setFixedSize(36, 36)
+        icon_label.setFixedSize(32, 32)
         icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         header_layout.addWidget(icon_label)
         
@@ -259,7 +280,7 @@ class FluentMessageBox(FluentDialogBase):
         return dialog.get_result()
     
     @staticmethod
-    def error(parent=None, title: str = "错误", message: str = "") -> bool:
+    def critical(parent=None, title: str = "错误", message: str = "") -> bool:
         dialog = FluentMessageBox(parent, title, message, MessageBoxType.ERROR)
         dialog.exec()
         return dialog.get_result()

@@ -1,0 +1,7 @@
+# Demo Project - 测试套件配置
+# 定义项目中的所有测试套件
+
+chery_lin测试:
+  description: "奇瑞水泵Lin测试"
+  suite_type: "lin"
+  priority: "high"

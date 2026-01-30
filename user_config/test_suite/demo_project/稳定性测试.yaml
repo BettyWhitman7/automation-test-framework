@@ -3,12 +3,5 @@
 
 root:
   process0:
-    长时间运行测试:
-      - demo_project
-      - demo_test_cases.py
-      - LongRunningTest
-      
-    压力测试:
-      - demo_project
-      - demo_test_cases.py
-      - StressTest
+    长时间运行测试: ["demo_project", "demo_test_cases.py", "LongRunningTest"]
+    压力测试: ["demo_project", "demo_test_cases.py", "StressTest"]

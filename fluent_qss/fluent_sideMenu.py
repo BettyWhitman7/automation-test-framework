@@ -1,5 +1,12 @@
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, Signal, QSize
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QButtonGroup, QHBoxLayout, QLabel, QSpacerItem, QSizePolicy
+from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt
+from PySide6.QtWidgets import (
+    QButtonGroup,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class FluentSideMenuItem(QPushButton):
