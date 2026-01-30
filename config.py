@@ -18,8 +18,4 @@ class Config:
         USER_CONFIG_DIR, "testcase_config"
     )  # 测试用例配置目录,用于用例执行时的参数配置
 
-    FILE_DIR = os.path.join(ROOT_DIR, "file")  # 文件目录
-    STATIC_DIR = os.path.join(ROOT_DIR, "static")  # 静态文件目录
-    DOC_DIR = os.path.join(ROOT_DIR, "doc")  # 文档目录
-    TEMPORARY_DIR = os.path.join(ROOT_DIR, "temporary")  # 临时文件目录
 
