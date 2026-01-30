@@ -19,3 +19,4 @@ class Config:
     )  # 测试用例配置目录,用于用例执行时的参数配置
 
 
+    USER_CONFIG_D2323
