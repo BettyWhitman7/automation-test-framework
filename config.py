@@ -23,7 +23,3 @@ class Config:
     DOC_DIR = os.path.join(ROOT_DIR, "doc")  # 文档目录
     TEMPORARY_DIR = os.path.join(ROOT_DIR, "temporary")  # 临时文件目录
 
-    # jenkins配置
-    JENKINS_SERVER_URL = ""
-    USER_ID = "admin"
-    AUTELITSTOKEN = "admin"

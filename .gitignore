@@ -49,5 +49,5 @@ nuitka-crash-report.xml
 *.ui.autosave
 
 # Test outputs
-test_results/
+test_reports/
 screenshots/
