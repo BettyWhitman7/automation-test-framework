@@ -19,3 +19,6 @@ class Config:
     )  # 测试用例配置目录,用于用例执行时的参数配置
     
     ENV_CONFIG_DIR = os.path.join(USER_CONFIG_DIR, "env_config")  # 环境配置目录
+    
+
+    
